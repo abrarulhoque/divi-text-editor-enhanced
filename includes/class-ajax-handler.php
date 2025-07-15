@@ -27,8 +27,8 @@ class Divi_Text_Editor_Ajax_Handler {
             wp_send_json_error( 'Unauthorized', 403 );
         }
 
-        // Capture inner content for Text, Heading, and Call-to-Action modules (all use closing tags).
-        $pattern = '#(\[et_pb_(?:text|heading|call_to_action)[^\]]*\])(.*?)(\[/et_pb_[^\]]*\])#s';
+        // Capture inner content for any Divi module (excluding structural ones like section/row/column). This works even when the builder isn't loaded.
+        $pattern = '#(\[et_pb_(?!section|row|column)[\w-]+[^\]]*\])(.*?)(\[/et_pb_[^\]]*\])#si';
         preg_match_all( $pattern, $post->post_content, $matches );
 
         $texts  = ! empty( $matches[2] ) ? $matches[2] : array();
@@ -76,7 +76,7 @@ class Divi_Text_Editor_Ajax_Handler {
             wp_send_json_error( 'Unauthorized', 403 );
         }
 
-        $pattern = '#(\[et_pb_(?:text|heading|call_to_action)[^\]]*\])(.*?)(\[/et_pb_[^\]]*\])#s';
+        $pattern = '#(\[et_pb_(?!section|row|column)[\w-]+[^\]]*\])(.*?)(\[/et_pb_[^\]]*\])#si';
         $i       = 0;
         $updated_content = preg_replace_callback( $pattern, function ( $m ) use ( &$i, $texts ) {
             $replacement = isset( $texts[ $i ] ) ? $texts[ $i ] : $m[2];
