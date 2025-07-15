@@ -63,7 +63,7 @@ jQuery(function ($) {
           texts.forEach(function (text, index) {
             const textarea = $(
               '<div style="margin-bottom:12px;">' +
-                '<label style="display:block;margin-bottom:4px;">Text Block ' +
+                '<label style="display:block;margin-bottom:4px;">Block ' +
                 (index + 1) +
                 '</label>' +
                 '<textarea data-index="' +

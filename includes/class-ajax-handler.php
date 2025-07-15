@@ -27,7 +27,8 @@ class Divi_Text_Editor_Ajax_Handler {
             wp_send_json_error( 'Unauthorized', 403 );
         }
 
-        $pattern = '#(\[et_pb_text[^\]]*\])(.*?)(\[/et_pb_text\])#s';
+        // Capture inner content for Text, Heading, and Call-to-Action modules (all use closing tags).
+        $pattern = '#(\[et_pb_(?:text|heading|call_to_action)[^\]]*\])(.*?)(\[/et_pb_[^\]]*\])#s';
         preg_match_all( $pattern, $post->post_content, $matches );
 
         $texts  = ! empty( $matches[2] ) ? $matches[2] : array();
@@ -75,7 +76,7 @@ class Divi_Text_Editor_Ajax_Handler {
             wp_send_json_error( 'Unauthorized', 403 );
         }
 
-        $pattern = '#(\[et_pb_text[^\]]*\])(.*?)(\[/et_pb_text\])#s';
+        $pattern = '#(\[et_pb_(?:text|heading|call_to_action)[^\]]*\])(.*?)(\[/et_pb_[^\]]*\])#s';
         $i       = 0;
         $updated_content = preg_replace_callback( $pattern, function ( $m ) use ( &$i, $texts ) {
             $replacement = isset( $texts[ $i ] ) ? $texts[ $i ] : $m[2];
