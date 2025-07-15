@@ -25,19 +25,20 @@ class Divi_Text_Editor_Ajax_Handler {
         $pattern = '#(\[et_pb_text[^\]]*\])(.*?)(\[/et_pb_text\])#s';
         preg_match_all( $pattern, $post->post_content, $matches );
 
-        $texts = array();
-        if ( ! empty( $matches[2] ) ) {
-            $texts = $matches[2]; // Group 2 contains the inner content.
-        }
+        $texts  = ! empty( $matches[2] ) ? $matches[2] : array();
+        $blocks = ! empty( $matches[0] ) ? $matches[0] : array();
 
-        $debug_data = array();
+        // Build debug information – always included but large strings are trimmed.
+        $debug_data = array(
+            'match_count'   => count( $texts ),
+            'layout_id'     => $layout_id,
+            'regex_pattern' => $pattern,
+            'blocks'        => array_map( function( $b ) {
+                return ( strlen( $b ) > 200 ) ? substr( $b, 0, 200 ) . '…' : $b;
+            }, $blocks ),
+        );
+
         if ( DTE_DEBUG ) {
-            $debug_data = array(
-                'match_count'   => count( $texts ),
-                'layout_id'     => $layout_id,
-                'regex_pattern' => $pattern,
-            );
-            // Log to debug.log as well.
             error_log( '[DTE] Fetch layout ' . $layout_id . ' – found ' . count( $texts ) . ' matches.' );
         }
 
@@ -91,12 +92,12 @@ class Divi_Text_Editor_Ajax_Handler {
             ET_Core_PageResource::remove_static_resources( 'all', 'all' );
         }
 
-        $debug_data = array();
+        $debug_data = array(
+            'updated_post_id' => $layout_id,
+            'text_count'      => count( $texts ),
+        );
+
         if ( DTE_DEBUG ) {
-            $debug_data = array(
-                'updated_post_id' => $layout_id,
-                'text_count'      => count( $texts ),
-            );
             error_log( '[DTE] Saved layout ' . $layout_id . ' – replaced ' . count( $texts ) . ' blocks.' );
         }
 

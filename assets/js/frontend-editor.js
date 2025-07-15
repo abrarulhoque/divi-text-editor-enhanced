@@ -45,6 +45,11 @@ jQuery(function ($) {
       },
       function (response) {
         console.log('[DTE] Fetch response:', response)
+        if (response.data && response.data.debug) {
+          console.group('[DTE] Debug info – fetch')
+          console.log(response.data.debug)
+          console.groupEnd()
+        }
         if (response.success) {
           const texts = response.data.texts
 
@@ -108,6 +113,11 @@ jQuery(function ($) {
       },
       function (response) {
         console.log('[DTE] Save response:', response)
+        if (response.data && response.data.debug) {
+          console.group('[DTE] Debug info – save')
+          console.log(response.data.debug)
+          console.groupEnd()
+        }
         if (response.success) {
           showMessage('Changes saved successfully.')
         } else {
