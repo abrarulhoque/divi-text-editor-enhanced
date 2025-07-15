@@ -53,6 +53,13 @@ jQuery(function ($) {
         if (response.success) {
           const texts = response.data.texts
 
+          // Verbose log of all captured texts (ordered).
+          console.group('[DTE] Text list (' + texts.length + ' items)')
+          texts.forEach(function (txt, idx) {
+            console.log(idx + ':', txt)
+          })
+          console.groupEnd()
+
           texts.forEach(function (text, index) {
             const textarea = $(
               '<div style="margin-bottom:12px;">' +
