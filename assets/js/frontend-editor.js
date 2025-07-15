@@ -51,7 +51,9 @@ jQuery(function ($) {
           console.groupEnd()
         }
         if (response.success) {
-          const texts = response.data.texts
+          capturedTexts = response.data.texts
+
+          const texts = capturedTexts // alias for backwards compatibility
 
           // Verbose log of all captured texts (ordered).
           console.group('[DTE] Text list (' + texts.length + ' items)')
@@ -60,16 +62,18 @@ jQuery(function ($) {
           })
           console.groupEnd()
 
-          texts.forEach(function (text, index) {
+          capturedTexts.forEach(function (obj, index) {
+            const label =
+              'Block ' + (obj.original_block_index + 1) + ' – ' + obj.key
             const textarea = $(
               '<div style="margin-bottom:12px;">' +
-                '<label style="display:block;margin-bottom:4px;">Block ' +
-                (index + 1) +
+                '<label style="display:block;margin-bottom:4px;">' +
+                label +
                 '</label>' +
                 '<textarea data-index="' +
                 index +
                 '" style="width:100%;min-height:120px;">' +
-                text.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                obj.value.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
                 '</textarea>' +
                 '</div>'
             )
@@ -98,14 +102,13 @@ jQuery(function ($) {
       return
     }
 
-    const texts = $editorsWrap
-      .find('textarea')
-      .map(function () {
-        return $(this).val()
-      })
-      .get()
+    // Update capturedTexts with edited values
+    $editorsWrap.find('textarea').each(function () {
+      const idx = $(this).data('index')
+      capturedTexts[idx].value = $(this).val()
+    })
 
-    console.log('[DTE] Texts to save:', texts)
+    console.log('[DTE] Texts to save:', capturedTexts)
 
     $saveButton.prop('disabled', true)
     showMessage('Saving…')
@@ -115,7 +118,7 @@ jQuery(function ($) {
       {
         action: 'dte_save_layout',
         layout_id: layoutId,
-        texts: texts,
+        texts: capturedTexts,
         nonce: DTE.nonce
       },
       function (response) {

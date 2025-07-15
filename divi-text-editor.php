@@ -49,6 +49,11 @@ class Divi_Text_Editor {
         // Core classes for the plugin.
         require_once DTE_PLUGIN_DIR . 'includes/class-shortcode.php';
         require_once DTE_PLUGIN_DIR . 'includes/class-ajax-handler.php';
+        
+        // Divi extraction helpers
+        require_once DTE_PLUGIN_DIR . 'includes/ajax_bootstrap.php';
+        require_once DTE_PLUGIN_DIR . 'includes/divi_text_extractor.php';
+        require_once DTE_PLUGIN_DIR . 'includes/regex_fallback.php';
     }
 
     public function register_assets() {
