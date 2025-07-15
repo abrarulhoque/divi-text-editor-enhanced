@@ -45,122 +45,64 @@ class Divi_Text_Extractor {
      *   ]
      */
     public static function extract($content) {
-        // ensure divi shortcodes loaded
+        // ensure all Divi (and 3rd-party) shortcodes are available for parsing
         DTE_Ajax_Bootstrap::ensure_divi_loaded();
-        
-        // use wordpress's get_shortcode_regex if available
-        if (function_exists('get_shortcode_regex')) {
-            $pattern = get_shortcode_regex(array_keys(self::$text_modules));
-        } else {
-            // fallback to simple regex
-            $pattern = self::get_fallback_regex();
-        }
 
-        $editable_texts  = [];
-        $original_blocks = [];
-        $debug_blocks    = [];
+        // use WordPress helper to capture *all* shortcodes in a single pass
+        $regex   = '/' . get_shortcode_regex() . '/s';
+        $matches = [];
+        preg_match_all( $regex, $content, $matches, PREG_SET_ORDER );
 
-        if (preg_match_all("/$pattern/s", $content, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $full_block = $match[0];
-                $tag        = $match[2];
-                
-                // skip non-text modules
-                if (!isset(self::$text_modules[$tag])) {
-                    continue;
-                }
-                
-                $module_info = self::$text_modules[$tag];
+        $texts  = [];
+        $blocks = [];
 
-                // ensure block is registered and determine its index
-                $block_index = array_search($full_block, $original_blocks, true);
-                if ($block_index === false) {
-                    $original_blocks[] = $full_block;
-                    $block_index       = count($original_blocks) - 1;
-                }
+        foreach ( $matches as $sc ) {
+            $tag     = $sc[2];   // shortcode tag e.g. et_pb_text, dipi_typing_text
+            $attsRaw = $sc[3];   // raw attribute string inside opening tag
+            $inner   = $sc[5];   // inner content between tags (may be empty)
+            $full    = $sc[0];   // full shortcode string – will be stored verbatim
 
-                // extract attributes
-                $attributes = shortcode_parse_atts($match[3]);
+            // skip Divi layout wrappers – we never want to expose those for editing
+            if ( in_array( $tag, [ 'et_pb_section', 'et_pb_row', 'et_pb_column' ], true ) ) {
+                continue;
+            }
 
-                // collect text from attributes
-                foreach ($module_info['text_attributes'] as $attr) {
-                    if (!empty($attributes[$attr])) {
-                        $editable_texts[] = [
+            // store the block and remember its index for later reference
+            $blocks[]     = $full;
+            $block_index  = count( $blocks ) - 1;
+
+            // parse attributes into key/value pairs
+            $atts = shortcode_parse_atts( $attsRaw );
+            if ( is_array( $atts ) ) {
+                foreach ( $atts as $key => $val ) {
+                    if ( is_string( $val ) && trim( $val ) !== '' ) {
+                        $texts[] = [
                             'original_block_index' => $block_index,
                             'shortcode_tag'        => $tag,
                             'type'                 => 'attribute',
-                            'key'                  => $attr,
-                            'value'                => $attributes[$attr],
+                            'key'                  => $key,
+                            'value'                => $val,
                         ];
                     }
                 }
+            }
 
-                // capture inner content if relevant
-                $inner_content = isset($match[5]) ? $match[5] : '';
-                if ($module_info['uses_inner_content'] && $inner_content !== '') {
-                    // check for nested shortcodes
-                    if (strpos($inner_content, '[et_pb_') !== false) {
-                        // recursively extract nested content
-                        $nested = self::extract($inner_content);
-
-                        // remap nested blocks into our master lists
-                        foreach ($nested['blocks'] as $nested_idx => $nested_block) {
-                            $existing_index = array_search($nested_block, $original_blocks, true);
-                            if ($existing_index === false) {
-                                $original_blocks[] = $nested_block;
-                                $mapped_index      = count($original_blocks) - 1;
-                            } else {
-                                $mapped_index = $existing_index;
-                            }
-
-                            // find all texts in nested that reference this block index
-                            foreach ($nested['texts'] as $nested_text) {
-                                if ($nested_text['original_block_index'] === $nested_idx) {
-                                    $nested_text['original_block_index'] = $mapped_index;
-                                    $editable_texts[] = $nested_text;
-                                }
-                            }
-                        }
-                    } else {
-                        $editable_texts[] = [
-                            'original_block_index' => $block_index,
-                            'shortcode_tag'        => $tag,
-                            'type'                 => 'inner_content',
-                            'key'                  => 'content',
-                            'value'                => $inner_content,
-                        ];
-                    }
-                }
-
-                // handle self-closing with content attribute fallback
-                if ($module_info['uses_inner_content'] && $inner_content === '' && !empty($attributes['content'])) {
-                    $editable_texts[] = [
-                        'original_block_index' => $block_index,
-                        'shortcode_tag'        => $tag,
-                        'type'                 => 'attribute',
-                        'key'                  => 'content',
-                        'value'                => $attributes['content'],
-                    ];
-                }
-
-                // collect debug information
-                if (defined('DTE_DEBUG') && DTE_DEBUG) {
-                    $debug_blocks[] = [
-                        'block' => $full_block,
-                        'tag'   => $tag,
-                    ];
-                }
+            // capture inner content (if any)
+            if ( trim( $inner ) !== '' ) {
+                $texts[] = [
+                    'original_block_index' => $block_index,
+                    'shortcode_tag'        => $tag,
+                    'type'                 => 'inner_content',
+                    'key'                  => 'content',
+                    'value'                => $inner,
+                ];
             }
         }
 
         return [
-            'texts'  => $editable_texts,
-            'blocks' => $original_blocks,
-            'debug'  => [
-                'match_count'      => count($editable_texts),
-                'shortcode_exists' => shortcode_exists('et_pb_text'),
-                'blocks'           => (defined('DTE_DEBUG') && DTE_DEBUG) ? $debug_blocks : [],
-            ],
+            'texts'  => $texts,
+            'blocks' => $blocks,
+            'debug'  => [ 'match_count' => count( $texts ) ],
         ];
     }
     
