@@ -3,6 +3,9 @@ jQuery(function ($) {
 
   console.log('[DTE] Front-end script initialised')
 
+  // Array to hold text objects returned from backend
+  let capturedTexts = []
+
   // Ensure DTE object exists from wp_localize_script.
   if (typeof DTE === 'undefined') {
     console.warn('[DTE] DTE data not found. Script will abort.')
