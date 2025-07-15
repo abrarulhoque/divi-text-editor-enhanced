@@ -39,9 +39,11 @@ class Divi_Text_Editor_Ajax_Handler {
         $tb_ids = [];
 
         // global header / body / footer
-        $tb_ids[] = et_theme_builder_get_global_header_id();
-        $tb_ids[] = et_theme_builder_get_global_body_id();
-        $tb_ids[] = et_theme_builder_get_global_footer_id();
+        if ( function_exists( 'et_theme_builder_get_global_header_id' ) ) {
+            $tb_ids[] = et_theme_builder_get_global_header_id();
+            $tb_ids[] = et_theme_builder_get_global_body_id();
+            $tb_ids[] = et_theme_builder_get_global_footer_id();
+        }
 
         // page-specific template (if you assigned one in the theme builder)
         if ( function_exists( 'et_theme_builder_get_all_used_templates' ) ) {
