@@ -31,11 +31,13 @@ class Divi_Text_Editor_Shortcode {
             'nonce'    => $nonce,
         ) );
 
-        // Fetch all Divi layouts.
+        // Fetch all regular pages/posts that use the Divi Builder on the front-end.
         $layouts = get_posts( array(
-            'post_type'      => 'et_pb_layout',
+            'post_type'      => 'page',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
+            'meta_key'       => '_et_pb_use_builder',
+            'meta_value'     => 'on',
             'orderby'        => 'title',
             'order'          => 'ASC',
         ) );
@@ -43,9 +45,9 @@ class Divi_Text_Editor_Shortcode {
         ob_start();
         ?>
         <div class="dte-editor-wrap">
-            <label for="dte-layout-selector" style="display:block;margin-bottom:6px;">Select Layout:</label>
+            <label for="dte-layout-selector" style="display:block;margin-bottom:6px;">Select Page:</label>
             <select id="dte-layout-selector" style="min-width:250px;">
-                <option value="">— Select a Layout —</option>
+                <option value="">— Select a Page —</option>
                 <?php foreach ( $layouts as $layout ) : ?>
                     <option value="<?php echo esc_attr( $layout->ID ); ?>">
                         <?php echo esc_html( $layout->post_title ); ?>

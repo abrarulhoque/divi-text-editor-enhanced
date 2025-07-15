@@ -18,8 +18,13 @@ class Divi_Text_Editor_Ajax_Handler {
         }
 
         $post = get_post( $layout_id );
-        if ( ! $post || 'et_pb_layout' !== $post->post_type ) {
-            wp_send_json_error( 'Layout not found', 404 );
+        if ( ! $post ) {
+            wp_send_json_error( 'Page not found', 404 );
+        }
+
+        // Additional capability check for this specific post.
+        if ( ! current_user_can( 'edit_post', $layout_id ) ) {
+            wp_send_json_error( 'Unauthorized', 403 );
         }
 
         $pattern = '#(\[et_pb_text[^\]]*\])(.*?)(\[/et_pb_text\])#s';
@@ -62,8 +67,12 @@ class Divi_Text_Editor_Ajax_Handler {
         }
 
         $post = get_post( $layout_id );
-        if ( ! $post || 'et_pb_layout' !== $post->post_type ) {
-            wp_send_json_error( 'Layout not found', 404 );
+        if ( ! $post ) {
+            wp_send_json_error( 'Page not found', 404 );
+        }
+
+        if ( ! current_user_can( 'edit_post', $layout_id ) ) {
+            wp_send_json_error( 'Unauthorized', 403 );
         }
 
         $pattern = '#(\[et_pb_text[^\]]*\])(.*?)(\[/et_pb_text\])#s';
