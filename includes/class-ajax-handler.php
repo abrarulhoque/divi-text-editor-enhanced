@@ -30,7 +30,21 @@ class Divi_Text_Editor_Ajax_Handler {
             $texts = $matches[2]; // Group 2 contains the inner content.
         }
 
-        wp_send_json_success( array( 'texts' => $texts ) );
+        $debug_data = array();
+        if ( DTE_DEBUG ) {
+            $debug_data = array(
+                'match_count'   => count( $texts ),
+                'layout_id'     => $layout_id,
+                'regex_pattern' => $pattern,
+            );
+            // Log to debug.log as well.
+            error_log( '[DTE] Fetch layout ' . $layout_id . ' – found ' . count( $texts ) . ' matches.' );
+        }
+
+        wp_send_json_success( array(
+            'texts' => $texts,
+            'debug' => $debug_data,
+        ) );
     }
 
     /**
@@ -77,7 +91,16 @@ class Divi_Text_Editor_Ajax_Handler {
             ET_Core_PageResource::remove_static_resources( 'all', 'all' );
         }
 
-        wp_send_json_success();
+        $debug_data = array();
+        if ( DTE_DEBUG ) {
+            $debug_data = array(
+                'updated_post_id' => $layout_id,
+                'text_count'      => count( $texts ),
+            );
+            error_log( '[DTE] Saved layout ' . $layout_id . ' – replaced ' . count( $texts ) . ' blocks.' );
+        }
+
+        wp_send_json_success( array( 'debug' => $debug_data ) );
     }
 
     /**

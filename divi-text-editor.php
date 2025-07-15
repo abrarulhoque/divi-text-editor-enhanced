@@ -39,6 +39,10 @@ class Divi_Text_Editor {
         if ( ! defined( 'DTE_PLUGIN_URL' ) ) {
             define( 'DTE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
         }
+        // Optional debug flag. Set `define( 'DTE_DEBUG', true );` in wp-config.php to enable.
+        if ( ! defined( 'DTE_DEBUG' ) ) {
+            define( 'DTE_DEBUG', false );
+        }
     }
 
     private function includes() {

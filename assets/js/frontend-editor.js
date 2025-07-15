@@ -25,6 +25,8 @@
   $selector.on('change', function () {
     const layoutId = $(this).val()
 
+    console.log('[DTE] Selected layout:', layoutId)
+
     resetEditor()
 
     if (!layoutId) {
@@ -39,6 +41,7 @@
         nonce: DTE.nonce
       },
       function (response) {
+        console.log('[DTE] Fetch response:', response)
         if (response.success) {
           const texts = response.data.texts
 
@@ -72,6 +75,9 @@
   // Save changes.
   $saveButton.on('click', function () {
     const layoutId = $selector.val()
+
+    console.log('[DTE] Saving layout:', layoutId)
+
     if (!layoutId) {
       showMessage('No layout selected.', true)
       return
@@ -83,6 +89,8 @@
         return $(this).val()
       })
       .get()
+
+    console.log('[DTE] Texts to save:', texts)
 
     $saveButton.prop('disabled', true)
     showMessage('Saving…')
@@ -96,6 +104,7 @@
         nonce: DTE.nonce
       },
       function (response) {
+        console.log('[DTE] Save response:', response)
         if (response.success) {
           showMessage('Changes saved successfully.')
         } else {
