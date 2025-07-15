@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Divi Text Editor
  * Description: Front-end inline text editor for Divi layouts.
- * Version: 0.1.0
- * Author: MVP Team
+ * Version: 0.2.0
+ * Author: Abrar
  * License: GPL2
  */
 

@@ -1,8 +1,11 @@
-;(function ($) {
+jQuery(function ($) {
   'use strict'
+
+  console.log('[DTE] Front-end script initialised')
 
   // Ensure DTE object exists from wp_localize_script.
   if (typeof DTE === 'undefined') {
+    console.warn('[DTE] DTE data not found. Script will abort.')
     return
   }
 
@@ -115,4 +118,4 @@
       'json'
     )
   })
-})(jQuery)
+})
