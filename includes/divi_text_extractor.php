@@ -7,6 +7,16 @@ class Divi_Text_Extractor {
      */
     public static function extract( string $content ): array {
 
+        // if divi shortcodes aren't registered, jump straight to the pure regex helper
+        if ( ! shortcode_exists( 'et_pb_text' ) ) {
+            $texts = extract_divi_text_regex_only( $content );
+            return [
+                'texts'  => $texts,
+                'blocks' => [], // we don't need them for save()
+                'debug'  => [ 'source' => 'regex_fallback', 'match_count' => count( $texts ) ],
+            ];
+        }
+
         $regex   = '/' . get_shortcode_regex() . '/s';
         preg_match_all( $regex, $content, $all, PREG_SET_ORDER );
 
