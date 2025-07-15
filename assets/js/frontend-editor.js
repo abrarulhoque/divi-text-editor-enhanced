@@ -52,6 +52,7 @@ jQuery(function ($) {
         }
         if (response.success) {
           const texts = response.data.texts
+          window.DTE_META = response.data.meta || []
 
           // Verbose log of all captured texts (ordered).
           console.group('[DTE] Text list (' + texts.length + ' items)')
@@ -116,6 +117,7 @@ jQuery(function ($) {
         action: 'dte_save_layout',
         layout_id: layoutId,
         texts: texts,
+        meta: JSON.stringify(window.DTE_META || []),
         nonce: DTE.nonce
       },
       function (response) {
